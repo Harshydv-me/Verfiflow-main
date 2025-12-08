@@ -28,50 +28,76 @@ export default function PlotRegistrationScreen() {
   const [plantingDate, setPlantingDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
 
+  // Loading state
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || plantingDate;
     setShowDatePicker(false);
     setPlantingDate(currentDate);
   };
 
-  const handleSubmit = () => {
-    const data = {
-      plotName,
-      area,
-      species,
-      remarks,
-      plantingDate: plantingDate.toISOString(),
-    };
-    (async () => {
-      // basic validation
-      if (!plotName || !area) {
-        Alert.alert('Validation', 'Please provide plot name and area');
+  const handleSubmit = async () => {
+    // Prevent double submissions
+    if (isSubmitting) {
+      return;
+    }
+
+    // Basic validation
+    if (!plotName || !area) {
+      Alert.alert('Validation', 'Please provide plot name and area');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const token = await AsyncStorage.getItem('token');
+
+      if (!token) {
+        Alert.alert('Error', 'Authentication token not found. Please login again.');
+        setIsSubmitting(false);
         return;
       }
 
-      try {
-        const token = await AsyncStorage.getItem('token');
-        const payload = {
-          title: plotName,
-          description: remarks,
-          areaHectares: Number(area),
-          cropType: species, 
-          metadata: { species },
-          startDate: plantingDate.toISOString(),
-        };
+      const payload = {
+        title: plotName,
+        description: remarks,
+        areaHectares: Number(area),
+        cropType: species,
+        metadata: { species },
+        startDate: plantingDate.toISOString(),
+      };
 
-        // show simple inline feedback
-        console.log('Submitting project', payload);
-        const resp = await projectsService.createProject(token, payload);
-        console.log('Project created', resp);
-        Alert.alert('Success', 'Plot registered successfully');
-        navigation.goBack();
-      } catch (err) {
-        console.error('Project creation error', err?.response ?? err);
-        const msg = err?.response?.data?.message ?? err.message ?? 'Failed to create project';
-        Alert.alert('Error', msg);
+      console.log('Submitting project', payload);
+      console.log('API URL:', `${projectsService.API_BASE ?? 'undefined'}/api/projects`);
+
+      const resp = await projectsService.createProject(token, payload);
+      console.log('Project created', resp);
+      Alert.alert('Success', 'Plot registered successfully');
+      navigation.goBack();
+    } catch (err) {
+      console.error('Project creation error:', err);
+      console.error('Error details:', JSON.stringify(err, null, 2));
+
+      let msg = 'Failed to create project';
+
+      if (err?.response) {
+        // Server responded with error
+        msg = err.response.data?.message ?? `Server error: ${err.response.status}`;
+        console.error('Server response:', err.response.data);
+      } else if (err?.request) {
+        // Request made but no response received
+        msg = 'Network error: Could not reach server. Please check your internet connection.';
+        console.error('Network error - no response received');
+      } else if (err?.message) {
+        msg = err.message;
       }
-    })();
+
+      Alert.alert('Error', msg);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -163,8 +189,14 @@ export default function PlotRegistrationScreen() {
         </View>
 
         {/* Submit */}
-        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-          <Text style={styles.submitButtonText}>Submit</Text>
+        <TouchableOpacity
+          style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]}
+          onPress={handleSubmit}
+          disabled={isSubmitting}
+        >
+          <Text style={styles.submitButtonText}>
+            {isSubmitting ? "Submitting..." : "Submit"}
+          </Text>
         </TouchableOpacity>
       </ScrollView>
     </LinearGradient>
@@ -221,6 +253,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
     marginTop: 10,
+  },
+  submitButtonDisabled: {
+    backgroundColor: "#6c757d",
+    opacity: 0.6,
   },
   submitButtonText: {
     color: "#fff",

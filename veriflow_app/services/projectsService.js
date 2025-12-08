@@ -5,8 +5,10 @@ import { Platform } from 'react-native';
  * Determine backend base URL depending on platform
  */
 const getApiBase = () => {
-  if (Platform.OS === 'web') return 'http://192.168.1.5:5001';
-  if (Platform.OS === 'android') return 'http://10.0.2.2:5001';
+  if (Platform.OS === 'web') return 'http://10.1.30.65:5001';
+  // For Android physical devices, use the LAN IP address (same as web)
+  // For Android emulator, you would need to use http://10.0.2.2:5001 instead
+  if (Platform.OS === 'android') return 'http://10.1.30.65:5001';
   if (Platform.OS === 'ios') return 'http://localhost:5001';
   return 'http://localhost:5001';
 };
@@ -22,7 +24,10 @@ const createProject = async (token, payload) => {
   if (!token) throw new Error("Token is required to create a project");
   const url = `${API_BASE}/api/projects`;
   const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
-  const res = await axios.post(url, payload, { headers });
+  const res = await axios.post(url, payload, {
+    headers,
+    timeout: 60000 // 60 second timeout
+  });
   return res.data;
 };
 
@@ -137,6 +142,7 @@ const updateUserVerification = async (token, userId, verificationStatus) => {
 };
 
 export default {
+  API_BASE,
   createProject,
   getProjects,
   getAllProjects,
