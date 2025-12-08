@@ -84,7 +84,7 @@ export default function FarmerDashboard({ navigation }) {
 
             <TouchableOpacity
               style={styles.card}
-              onPress={() => navigation.navigate("FarmerDashboard")}
+              onPress={() => navigation.navigate("Marketplace")}
               activeOpacity={0.8}
             >
               <Text style={styles.cardTitle}>Marketplace</Text>
