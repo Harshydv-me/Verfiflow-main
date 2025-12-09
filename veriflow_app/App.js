@@ -18,6 +18,7 @@ import MarketplaceDashboard from "./screen/MarketplaceDashboard";
 import MarketplaceUsersScreen from "./screen/MarketplaceUsersScreen";
 import SystemSettingsScreen from "./screen/SystemSettingsScreen";
 import VerificationScreen from "./screen/VerificationScreen";
+import BlockchainScreen from "./screen/BlockchainScreen";
 
 const Stack = createStackNavigator();
 
@@ -42,6 +43,7 @@ export default function AppNavigator() {
       <Stack.Screen name="MarketplaceUsers" component={MarketplaceUsersScreen} options={{ headerShown: false }}/>
       <Stack.Screen name="SystemSettings" component={SystemSettingsScreen} options={{ headerShown: false }}/>
       <Stack.Screen name="Verification" component={VerificationScreen} options={{ headerShown: false }}/>
+      <Stack.Screen name="BlockchainScreen" component={BlockchainScreen} options={{ headerShown: false }}/>
     </Stack.Navigator>
 
   );

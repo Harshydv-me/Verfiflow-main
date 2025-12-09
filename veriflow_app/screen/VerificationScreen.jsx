@@ -257,13 +257,43 @@ export default function VerificationScreen({ route, navigation }) {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      Alert.alert("Success", "Project approved successfully!");
-      setResultsModalVisible(false);
-      setSelectedProject(null);
-      setMlResults(null);
-      setNotes("");
-      setDroneImage(null);
-      fetchProjects();
+      // After successful approval, offer to mint NFT
+      Alert.alert(
+        "✅ Project Approved",
+        "Project has been verified successfully!\n\nWould you like to mint a Carbon Credit NFT on the blockchain?",
+        [
+          {
+            text: "Skip for Now",
+            style: "cancel",
+            onPress: () => {
+              setResultsModalVisible(false);
+              setSelectedProject(null);
+              setMlResults(null);
+              setNotes("");
+              setDroneImage(null);
+              fetchProjects();
+            },
+          },
+          {
+            text: "Mint NFT",
+            onPress: () => {
+              // Navigate to BlockchainScreen with project and ML results
+              navigation.navigate("BlockchainScreen", {
+                project: selectedProject,
+                mlResults: mlResults,
+                imageUri: droneImage?.uri || null,
+              });
+
+              // Clean up local state
+              setResultsModalVisible(false);
+              setSelectedProject(null);
+              setMlResults(null);
+              setNotes("");
+              setDroneImage(null);
+            },
+          },
+        ]
+      );
     } catch (error) {
       console.error("Approval Error:", error);
       Alert.alert("Error", "Failed to approve project");
