@@ -143,12 +143,8 @@ export default function VerificationScreen({ route, navigation }) {
       });
 
       // Add date range (use project dates or defaults)
-      const startDate = selectedProject.startDate
-        ? new Date(selectedProject.startDate).toISOString().split("T")[0]
-        : "2024-01-01";
-      const endDate = selectedProject.endDate
-        ? new Date(selectedProject.endDate).toISOString().split("T")[0]
-        : new Date().toISOString().split("T")[0];
+      const startDate = "2024-01-01"
+      const endDate = "2024-12-31"
 
       formData.append("start_date", startDate);
       formData.append("end_date", endDate);

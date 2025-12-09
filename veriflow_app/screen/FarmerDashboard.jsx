@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, SafeAreaView } from "react-native";
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import ChatBox from "../components/ChatBox";
 
 
 export default function FarmerDashboard({ navigation }) {
@@ -94,6 +95,9 @@ export default function FarmerDashboard({ navigation }) {
             </TouchableOpacity>
           </View>
         </ScrollView>
+
+        {/* ChatBox Component - Fixed at bottom, not scrolling */}
+        <ChatBox apiUrl="https://precosmic-charlene-germfree.ngrok-free.dev" />
       </SafeAreaView>
     </LinearGradient>
   );
