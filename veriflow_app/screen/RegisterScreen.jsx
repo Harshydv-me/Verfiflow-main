@@ -49,14 +49,17 @@ const RegisterScreen = ({ navigation }) => {
 
       await AsyncStorage.setItem('token', token);
       await AsyncStorage.setItem('role', role);
+      await AsyncStorage.setItem('user', JSON.stringify(user));
 
       Alert.alert('Registered', `Welcome ${user?.name ?? user?.email ?? ''}`);
 
-      // Navigate to Marketplace if user is a marketplace user, otherwise to Login
+      // Navigate based on role
       if (role === 'marketplaceuser') {
-        navigation.navigate('Marketplace');
+        navigation.replace('MarketplaceDashboard');
+      } else if (role === 'farmer') {
+        navigation.replace('FarmerDashboard');
       } else {
-        navigation.navigate('Login');
+        navigation.replace('Login');
       }
 
       return user;

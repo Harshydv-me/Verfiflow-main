@@ -1,19 +1,7 @@
 import axios from 'axios';
-import { Platform } from 'react-native';
+import { API_BASE } from '../config/api';
 
-/**
- * Determine backend base URL depending on platform
- */
-const getApiBase = () => {
-  if (Platform.OS === 'web') return 'http://10.1.30.65:5001';
-  // For Android physical devices, use the LAN IP address (same as web)
-  // For Android emulator, you would need to use http://10.0.2.2:5001 instead
-  if (Platform.OS === 'android') return 'http://10.1.30.65:5001';
-  if (Platform.OS === 'ios') return 'http://localhost:5001';
-  return 'http://localhost:5001';
-};
-
-export const API_BASE = getApiBase();
+export { API_BASE };
 
 /**
  * ===== Project APIs =====
@@ -141,6 +129,74 @@ const updateUserVerification = async (token, userId, verificationStatus) => {
   return res.data;
 };
 
+/**
+ * ===== ML API Integration =====
+ */
+
+// ML API Configuration
+// IMPORTANT: Update this URL with your actual Ngrok URL
+// To get the URL:
+// 1. Navigate to your ML backend folder (where api_server.py is located)
+// 2. Run: python api_server.py (or uvicorn api_server:app)
+// 3. In another terminal, run: ngrok http 8000
+// 4. Copy the HTTPS URL (e.g., https://abc123.ngrok-free.app)
+// 5. Replace YOUR_NGROK_URL below with that URL
+const ML_API_BASE = "https://annabel-unperpetuated-unmythologically.ngrok-free.dev";
+
+const getMLApiUrl = () => {
+  // Return the full ML API endpoint URL
+  return `${ML_API_BASE}/api/analyze`;
+};
+
+// Check if ML API is configured
+const isMLApiConfigured = () => {
+  return !ML_API_BASE.includes("YOUR_NGROK_URL");
+};
+
+// Run ML Analysis on a project
+const runMLAnalysis = async (projectId, token, droneImageFile, startDate, endDate, manualHeight = 6.23) => {
+  if (!isMLApiConfigured()) {
+    throw new Error("ML API is not configured. Please update the Ngrok URL in projectsService.js");
+  }
+
+  const formData = new FormData();
+
+  // Add drone image
+  formData.append("image", droneImageFile);
+
+  // Add parameters
+  formData.append("start_date", startDate);
+  formData.append("end_date", endDate);
+  formData.append("manual_height", manualHeight.toString());
+
+  const response = await axios.post(getMLApiUrl(), formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+    timeout: 300000, // 5 minutes for ML processing
+  });
+
+  return response.data;
+};
+
+// Save ML results to a project
+const saveMLResults = async (projectId, token, mlResults) => {
+  if (!projectId) throw new Error("Project ID is required");
+  if (!token) throw new Error("Token is required");
+
+  const response = await axios.patch(
+    `${API_BASE}/api/projects/${projectId}`,
+    {
+      mlAnalysisResults: mlResults,
+    },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+
+  return response.data;
+};
+
 export default {
   API_BASE,
   createProject,
@@ -152,4 +208,9 @@ export default {
   deleteUser,
   updateUserStatus,
   updateUserVerification,
+  // ML API functions
+  getMLApiUrl,
+  isMLApiConfigured,
+  runMLAnalysis,
+  saveMLResults,
 };

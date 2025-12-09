@@ -25,6 +25,7 @@ export default function AdminDashboard({ navigation }) {
   const dashboardItems = [
     { title: "Manage Farmers", desc: "View, edit & approve farmer accounts", icon: "people", screen: "ManageFarmers" },
     { title: "Manage Plots", desc: "Review plot registrations & status", icon: "leaf", screen: "ManagePlots" },
+    { title: "ML Verification", desc: "Run ML analysis & verify carbon credits", icon: "analytics-outline", screen: "Verification" },
     { title: "Carbon Credit Reports", desc: "View MRV stats & credit calculations", icon: "analytics", screen: "CarbonReportsScreen" },
     { title: "Marketplace Users", desc: "Verify buyers/sellers & transactions", icon: "cart", screen: "MarketplaceUsers" },
     { title: "System Settings", desc: "App configurations & permissions", icon: "settings", screen: "SystemSettings" },

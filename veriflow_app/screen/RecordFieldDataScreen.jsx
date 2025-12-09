@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -10,11 +10,21 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width, height } = Dimensions.get('window');
 
 export default function RecordFieldDataScreen() {
   const navigation = useNavigation();
+  const [token, setToken] = useState(null);
+
+  useEffect(() => {
+    const loadToken = async () => {
+      const storedToken = await AsyncStorage.getItem('token');
+      setToken(storedToken);
+    };
+    loadToken();
+  }, []);
 
   const handleSatellitePress = () => {
     console.log('Satellite button pressed');
@@ -27,8 +37,11 @@ export default function RecordFieldDataScreen() {
   };
 
   const handleVerifyPress = () => {
-    console.log('Verify button pressed');
-    // Add your navigation or functionality here
+    if (token) {
+      navigation.navigate('Verification', { token });
+    } else {
+      console.log('No token available');
+    }
   };
 
   return (
@@ -83,13 +96,16 @@ export default function RecordFieldDataScreen() {
               <Text style={styles.buttonLabel}>Drone</Text>
             </TouchableOpacity>
 
-            {/* Verify Button */}
+            {/* Verify Button - Triggers ML Analysis */}
             <TouchableOpacity
               style={styles.verifyButton}
               onPress={handleVerifyPress}
               activeOpacity={0.8}
             >
-              <Text style={styles.verifyButtonText}>Verify</Text>
+              <Text style={styles.verifyButtonLabel}>Verify with ML</Text>
+              <Text style={styles.verifyButtonSubtext}>
+                Run carbon sequestration analysis
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -165,23 +181,31 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   verifyButton: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 10,
-    paddingVertical: 12,
-    paddingHorizontal: 140,
+    backgroundColor: '#10b981',
+    borderRadius: 15,
+    width: width * 0.85,
+    paddingVertical: 20,
+    paddingHorizontal: 20,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 6,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowOpacity: 0.35,
+    shadowRadius: 6.68,
+    elevation: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  verifyButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#5A7FE2',
-    letterSpacing: 0.5,
+  verifyButtonLabel: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 4,
+  },
+  verifyButtonSubtext: {
+    fontSize: 14,
+    color: '#FFFFFF',
+    opacity: 0.9,
   },
 });

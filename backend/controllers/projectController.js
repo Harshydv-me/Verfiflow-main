@@ -42,7 +42,16 @@ exports.getProjects = async (req, res) => {
   try {
     const filter = {};
     if (req.query.owner) filter.owner = req.query.owner;
-    if (req.query.status) filter.status = req.query.status;
+
+    // Handle multiple status values (e.g., "submitted,underReview")
+    if (req.query.status) {
+      const statusValues = req.query.status.split(',').map(s => s.trim());
+      if (statusValues.length > 1) {
+        filter.status = { $in: statusValues };
+      } else {
+        filter.status = statusValues[0];
+      }
+    }
 
     const projects = await Project.find(filter)
       .populate('owner', 'name email role')
@@ -165,13 +174,33 @@ exports.updateProject = async (req, res) => {
     const project = await Project.findById(req.params.id);
     if (!project) return res.status(404).json({ message: 'Project not found' });
 
-    // Only admin can update project status
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ message: 'Forbidden: Admin access required' });
+    // Check if admin or owner
+    const isAdmin = req.user.role === 'admin';
+    const isOwner = project.owner.toString() === req.user.id;
+
+    if (!isAdmin && !isOwner) {
+      return res.status(403).json({ message: 'Forbidden: Access denied' });
     }
 
     // Update allowed fields
-    const { status, title, description, location, areaHectares, cropType, startDate, endDate } = req.body;
+    const {
+      status,
+      title,
+      description,
+      location,
+      areaHectares,
+      cropType,
+      startDate,
+      endDate,
+      verification,
+      fieldVerification,
+      mlAnalysisResults
+    } = req.body;
+
+    // Only admin can change status to verified/rejected
+    if (status && (status === 'verified' || status === 'rejected') && !isAdmin) {
+      return res.status(403).json({ message: 'Forbidden: Only admin can verify/reject projects' });
+    }
 
     if (status) project.status = status;
     if (title) project.title = title;
@@ -181,6 +210,18 @@ exports.updateProject = async (req, res) => {
     if (cropType) project.cropType = cropType;
     if (startDate) project.startDate = startDate;
     if (endDate) project.endDate = endDate;
+
+    // Handle verification data (for admin approval/rejection)
+    if (verification) project.verification = verification;
+
+    // Handle field verification data
+    if (fieldVerification) project.fieldVerification = fieldVerification;
+
+    // Handle ML analysis results (from ML API)
+    if (mlAnalysisResults) {
+      project.mlAnalysisResults = mlAnalysisResults;
+      console.log('ML Analysis Results saved to project:', project._id);
+    }
 
     await project.save();
     return res.json({ message: 'Project updated successfully', project });

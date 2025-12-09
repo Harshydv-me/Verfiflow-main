@@ -81,6 +81,42 @@ const ProjectSchema = new mongoose.Schema(
 			verifiedAt: { type: Date },
 			notes: { type: String },
 		},
+		// Field verification (done manually by field operators)
+		fieldVerification: {
+			verified: { type: Boolean, default: false },
+			verifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+			verifiedAt: { type: Date },
+			notes: { type: String },
+		},
+		// ML Analysis Results (from ML model)
+		mlAnalysisResults: {
+			status: { type: String },
+			job_id: { type: String },
+			processing_time_seconds: { type: Number },
+			final_results: {
+				agb_Mg_per_ha: { type: Number },
+				carbon_sequestration_kg: { type: Number },
+				study_area_ha: { type: Number },
+			},
+			component_results: {
+				satellite: {
+					agb_Mg_per_ha: { type: Number },
+					height_m: { type: Number },
+					confidence: { type: Number },
+					n_points: { type: Number },
+				},
+				drone: {
+					agb_Mg_per_ha: { type: Number },
+					area_m2: { type: Number },
+					openness: { type: Number },
+					carbon_kg: { type: Number },
+					co2_kg: { type: Number },
+					confidence: { type: Number },
+				},
+			},
+			integration_weights: { type: mongoose.Schema.Types.Mixed },
+			metadata: { type: mongoose.Schema.Types.Mixed },
+		},
 		metadata: { type: mongoose.Schema.Types.Mixed },
 	},
 	{ timestamps: true }

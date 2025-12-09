@@ -27,7 +27,7 @@
     "@web3modal/wagmi-react-native": "^2.0.5",
     "axios": "^1.13.2",
     "expo": "~54.0.26",
-    "expo-camera": "~17.0.9",
+    "expo-camera": "~17.0.10",
     "expo-checkbox": "^5.0.7",
     "expo-constants": "~18.0.10",
     "expo-datepicker": "^1.0.23",
@@ -55,7 +55,8 @@
     "react-native-web": "~0.21.0",
     "react-native-worklets": "0.5.1",
     "viem": "^2.41.2",
-    "wagmi": "^3.1.0"
+    "wagmi": "^3.1.0",
+    "expo-file-system": "~19.0.20"
   },
   "devDependencies": {
     "@react-native-community/cli": "^20.0.2",
